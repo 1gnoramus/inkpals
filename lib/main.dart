@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:inkpals_app/constants.dart';
 import 'package:inkpals_app/screens/LoginScreen.dart';
@@ -5,7 +6,9 @@ import 'package:inkpals_app/screens/MainScreen.dart';
 import 'package:inkpals_app/screens/RegisterScreen.dart';
 import 'package:inkpals_app/screens/WelcomeScreen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(const MyApp());
 }
 

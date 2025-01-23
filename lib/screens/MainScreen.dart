@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -13,6 +16,24 @@ class Line {
   final Color color;
   final List<Offset?> points;
   final double strokeWidth;
+
+  Map<String, dynamic> toJson() {
+    return {
+      'color': color.value.toRadixString(16).padLeft(8, '0'),
+      'points':
+          points.map((p) => p != null ? {'x': p.dx, 'y': p.dy} : null).toList(),
+      'strokeWidth': strokeWidth,
+    };
+  }
+
+  static Line fromJson(Map<String, dynamic> json) {
+    return Line(
+        color: Color(int.parse(json['color'], radix: 16)),
+        points: (json['points'] as List<dynamic>)
+            .map((p) => p != null ? Offset(p['x'], p['y']) : null)
+            .toList(),
+        strokeWidth: json['strokeWidth']);
+  }
 }
 
 class MainScreenState extends State<MainScreen> {
@@ -20,6 +41,25 @@ class MainScreenState extends State<MainScreen> {
   List<Line> get lines => _lines;
   Color _selectedColor = Colors.black;
   double _strokeWidth = 4.0;
+
+  final _channel = WebSocketChannel.connect(
+    Uri.parse('ws://127.0.0.1:8000'),
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    _channel.stream.listen((message) {
+      final data = jsonDecode(message);
+      final line = Line.fromJson(data);
+      setState(() {
+        _lines.add(line);
+      });
+    }, onError: (error) {
+      print('Ошибка WebSocket: $error');
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,21 +81,25 @@ class MainScreenState extends State<MainScreen> {
           GestureDetector(
             key: const Key('canvas_gesture_detector'),
             onPanStart: (details) {
-              setState(() {
-                _lines.add(Line(
-                  points: [details.localPosition],
+              final newLine = Line(
                   color: _selectedColor,
-                  strokeWidth: _strokeWidth,
-                ));
+                  points: [details.localPosition],
+                  strokeWidth: _strokeWidth);
+
+              setState(() {
+                _lines.add(newLine);
               });
+              _channel.sink.add(jsonEncode(newLine.toJson()));
             },
             onPanUpdate: (details) {
               setState(() {
                 _lines.last.points.add(details.localPosition);
               });
+              _channel.sink.add(jsonEncode(_lines.last.toJson()));
             },
             onPanEnd: (details) {
               _lines.last.points.add(null);
+              _channel.sink.add(jsonEncode(_lines.last.toJson()));
             },
             child: CustomPaint(
               size: Size.infinite,
@@ -112,6 +156,14 @@ class MainScreenState extends State<MainScreen> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    if (_channel.closeCode == null) {
+      _channel.sink.close();
+    }
+    super.dispose();
   }
 }
 
