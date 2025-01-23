@@ -43,7 +43,7 @@ class MainScreenState extends State<MainScreen> {
   double _strokeWidth = 4.0;
 
   final _channel = WebSocketChannel.connect(
-    Uri.parse('ws://127.0.0.1:8000'),
+    Uri.parse('ws://192.168.0.105:8000'),
   );
 
   @override

@@ -1,8 +1,8 @@
 import 'dart:io';
 
 void main() async {
-  final server = await HttpServer.bind('127.0.0.1', 8000);
-  print('WebSocket-сервер запущен на ws://127.0.0.1:8000');
+  final server = await HttpServer.bind('0.0.0.0', 8000);
+  print('WebSocket-сервер запущен на ws://192.168.0.105:8000');
   await for (HttpRequest request in server) {
     if (WebSocketTransformer.isUpgradeRequest(request)) {
       WebSocketTransformer.upgrade(request).then(handleWebSocket);
