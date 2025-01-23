@@ -37,6 +37,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   SignUpButton(text: 'Google'),
+                  SizedBox(
+                    width: 10.0,
+                  ),
                   SignUpButton(text: 'Facebook')
                 ],
               ),

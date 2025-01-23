@@ -4,6 +4,7 @@ import 'package:inkpals_app/components/header_text.dart';
 import 'package:inkpals_app/components/red_nav_button.dart';
 import 'package:inkpals_app/screens/RegisterScreen.dart';
 
+// TODO: add push notif saying: "What's your mood for today" to share your thougth with your partner
 class WelcomeScreen extends StatefulWidget {
   static String id = 'welcome_screen_id';
   const WelcomeScreen({super.key});
