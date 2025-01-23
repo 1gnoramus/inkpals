@@ -5,7 +5,7 @@ class MainScreen extends StatefulWidget {
   static String id = 'main_screen_id';
 
   @override
-  State<MainScreen> createState() => _MainScreenState();
+  State<MainScreen> createState() => MainScreenState();
 }
 
 class Line {
@@ -15,9 +15,9 @@ class Line {
   final double strokeWidth;
 }
 
-class _MainScreenState extends State<MainScreen> {
-  List<Offset?> _points = [];
-  List<Line> _lines = [];
+class MainScreenState extends State<MainScreen> {
+  final List<Line> _lines = [];
+  List<Line> get lines => _lines;
   Color _selectedColor = Colors.black;
   double _strokeWidth = 4.0;
   @override
@@ -39,6 +39,7 @@ class _MainScreenState extends State<MainScreen> {
       body: Stack(
         children: [
           GestureDetector(
+            key: const Key('canvas_gesture_detector'),
             onPanStart: (details) {
               setState(() {
                 _lines.add(Line(
