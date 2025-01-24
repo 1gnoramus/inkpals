@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "967326719975",
+    "project_id": "inkpal-407c3",
+    "storage_bucket": "inkpal-407c3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:967326719975:android:cf374e92fd56ed99af2742",
+        "android_client_info": {
+          "package_name": "com.example.inkpals_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCeT8PX6Erdtbk4SwmbwlOk4sdQ7XbNCy8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

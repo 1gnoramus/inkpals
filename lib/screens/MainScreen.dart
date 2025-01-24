@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -43,18 +44,31 @@ class MainScreenState extends State<MainScreen> {
   double _strokeWidth = 4.0;
 
   final _channel = WebSocketChannel.connect(
-    Uri.parse('ws://192.168.0.105:8000'),
+    Uri.parse('wss://websocket-server-node-baeb166e25da.herokuapp.com/'),
   );
 
   @override
   void initState() {
     super.initState();
     _channel.stream.listen((message) {
-      final data = jsonDecode(message);
-      final line = Line.fromJson(data);
-      setState(() {
-        _lines.add(line);
-      });
+      if (message is String) {
+        // Если сообщение - строка, декодируем его как JSON
+        final data = jsonDecode(message);
+        final line = Line.fromJson(data);
+        setState(() {
+          _lines.add(line);
+        });
+      } else if (message is Uint8List) {
+        // Если сообщение - бинарные данные (Uint8List), декодируем их в строку
+        final decodedMessage = utf8.decode(message);
+        final data = jsonDecode(decodedMessage);
+        final line = Line.fromJson(data);
+        setState(() {
+          _lines.add(line);
+        });
+      } else {
+        print('Received unsupported message type: ${message.runtimeType}');
+      }
     }, onError: (error) {
       print('Ошибка WebSocket: $error');
     });
