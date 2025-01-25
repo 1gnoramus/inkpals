@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:inkpals_app/screens/CanvasScreen.dart';
 import 'package:inkpals_app/screens/MainScreen.dart';
 
 class LoginScreen extends StatefulWidget {
