@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:inkpals_app/constants.dart';
 import 'package:inkpals_app/models/drawing_model.dart';
+import 'package:inkpals_app/models/line_model.dart';
 import 'package:inkpals_app/screens/CanvasScreen.dart';
 import 'package:inkpals_app/services/shared_prefs.dart';
 
@@ -45,9 +46,11 @@ class _MainScreenState extends State<MainScreen> {
                 ElevatedButton(
                     onPressed: () {
                       final name = _controller.text.trim();
+                      List<Line> lines = [];
                       if (name.isNotEmpty) {
                         final newDrawing = DrawingModel(
                           name: name,
+                          lines: lines,
                           id: DateTime.now().microsecondsSinceEpoch.toString(),
                         );
 
@@ -92,6 +95,7 @@ class _MainScreenState extends State<MainScreen> {
                     builder: (context) => CanvasScreen(
                       drawingName: drawing.name,
                       drawingId: drawing.id,
+                      drawingLines: drawing.lines,
                     ),
                   ),
                 );

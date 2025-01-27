@@ -32,4 +32,26 @@ class SharedPreferencesRepository {
     }
     return drawings;
   }
+
+  Future<void> updateDrawingOffline(DrawingModel updatedDrawing) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<DrawingModel> savedDrawings = await getDrawingsOffline();
+    for (int i = 0; i < savedDrawings.length; i++) {
+      if (savedDrawings[i].id == updatedDrawing.id) {
+        savedDrawings[i] = updatedDrawing;
+        break;
+      }
+    }
+    await prefs.setString(
+      'saved_drawings',
+      json.encode(
+        savedDrawings.map((e) => e.toJson()).toList(),
+      ),
+    );
+  }
+
+  void clearAllPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear(); // Полное удаление всех данных
+  }
 }

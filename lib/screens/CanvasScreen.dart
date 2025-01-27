@@ -3,23 +3,28 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:inkpals_app/components/canvas_painter.dart';
+import 'package:inkpals_app/models/drawing_model.dart';
 import 'package:inkpals_app/models/line_model.dart';
+import 'package:inkpals_app/services/shared_prefs.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 class CanvasScreen extends StatefulWidget {
-  const CanvasScreen({super.key, this.drawingName, this.drawingId});
+  const CanvasScreen(
+      {super.key, this.drawingName, this.drawingId, this.drawingLines});
   static String id = 'canvas_screen_id';
   final String? drawingName;
   final String? drawingId;
+  final List<Line>? drawingLines;
   @override
   State<CanvasScreen> createState() => CanvasScreenState();
 }
 
 class CanvasScreenState extends State<CanvasScreen> {
-  final List<Line> _lines = [];
+  List<Line> _lines = [];
   List<Line> get lines => _lines;
   Color _selectedColor = Colors.black;
   double _strokeWidth = 4.0;
+  SharedPreferencesRepository prefs = SharedPreferencesRepository();
 
   final _channel = WebSocketChannel.connect(
     Uri.parse('wss://websocket-server-node-baeb166e25da.herokuapp.com/'),
@@ -28,6 +33,7 @@ class CanvasScreenState extends State<CanvasScreen> {
   @override
   void initState() {
     super.initState();
+    _lines = widget.drawingLines ?? [];
     _channel.stream.listen((message) {
       if (message is String) {
         final data = jsonDecode(message);
@@ -85,11 +91,20 @@ class CanvasScreenState extends State<CanvasScreen> {
               setState(() {
                 _lines.last.points.add(details.localPosition);
               });
+
               _channel.sink.add(jsonEncode(_lines.last.toJson()));
             },
             onPanEnd: (details) {
-              _lines.last.points.add(null);
-              _channel.sink.add(jsonEncode(_lines.last.toJson()));
+              if (_lines.last.points.isNotEmpty) {
+                _lines.last.points.add(null);
+                DrawingModel updatedDrawing = DrawingModel(
+                  name: widget.drawingName!,
+                  id: widget.drawingId!,
+                  lines: _lines,
+                );
+                _channel.sink.add(jsonEncode(_lines.last.toJson()));
+                prefs.updateDrawingOffline(updatedDrawing);
+              }
             },
             child: CustomPaint(
               size: Size.infinite,
@@ -142,7 +157,10 @@ class CanvasScreenState extends State<CanvasScreen> {
         decoration: BoxDecoration(
           color: color,
           shape: BoxShape.circle,
-          border: Border.all(color: Colors.grey, width: 1.0),
+          border: Border.all(
+            color: _selectedColor == color ? color : Colors.white,
+            width: 4.0,
+          ),
         ),
       ),
     );
@@ -150,8 +168,12 @@ class CanvasScreenState extends State<CanvasScreen> {
 
   @override
   void dispose() {
-    if (_channel.closeCode == null) {
-      _channel.sink.close();
+    try {
+      if (_channel.closeCode == null) {
+        _channel.sink.close();
+      }
+    } catch (e) {
+      print('Ошибка при закрытии WebSocket: $e');
     }
     super.dispose();
   }
