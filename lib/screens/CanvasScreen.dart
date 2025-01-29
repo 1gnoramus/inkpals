@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:inkpals_app/components/canvas_painter.dart';
 import 'package:inkpals_app/models/drawing_model.dart';
 import 'package:inkpals_app/models/line_model.dart';
+import 'package:inkpals_app/services/firebase_repo.dart';
 import 'package:inkpals_app/services/shared_prefs.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -24,6 +25,7 @@ class CanvasScreenState extends State<CanvasScreen> {
   List<Line> get lines => _lines;
   Color _selectedColor = Colors.black;
   double _strokeWidth = 4.0;
+  FirebaseRepository firebase = FirebaseRepository();
   SharedPreferencesRepository prefs = SharedPreferencesRepository();
 
   final _channel = WebSocketChannel.connect(
@@ -66,6 +68,12 @@ class CanvasScreenState extends State<CanvasScreen> {
             onPressed: () {
               setState(() {
                 _lines.clear();
+                DrawingModel updatedDrawing = DrawingModel(
+                  name: widget.drawingName!,
+                  id: widget.drawingId!,
+                  lines: _lines,
+                );
+                firebase.updateDrawingFirestore(updatedDrawing);
               });
             },
             icon: Icon(Icons.refresh),
@@ -104,6 +112,7 @@ class CanvasScreenState extends State<CanvasScreen> {
                 );
                 _channel.sink.add(jsonEncode(_lines.last.toJson()));
                 prefs.updateDrawingOffline(updatedDrawing);
+                firebase.updateDrawingFirestore(updatedDrawing);
               }
             },
             child: CustomPaint(

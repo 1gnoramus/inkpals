@@ -54,4 +54,15 @@ class SharedPreferencesRepository {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear(); // Полное удаление всех данных
   }
+
+  Future<void> deleteDrawingOffline(DrawingModel drawing) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<DrawingModel> drawings = await getDrawingsOffline();
+    drawings.removeWhere((doc) => doc.id == drawing.id);
+
+    await prefs.setString(
+      'saved_drawings',
+      json.encode(drawings.map((e) => e.toJson()).toList()),
+    );
+  }
 }
