@@ -24,9 +24,9 @@ class FirebaseRepository {
   }
 
   Future<void> saveDrawingtoFirestore(DrawingModel drawing) async {
-    if (drawing == null) {
-      throw ArgumentError('Drawing cannot t be null');
-    }
+    // if (drawing == null) {
+    //   throw ArgumentError('Drawing cannot t be null');
+    // }
     try {
       await _firestore.collection('drawings').doc(drawing.id).set({
         'name': drawing.name,
@@ -59,10 +59,10 @@ class FirebaseRepository {
   }
 
   Future<void> deleteDrawingFirestore(DrawingModel drawing) async {
-    if (drawing.id == null || drawing.id.isEmpty) {
-      print('Error: Drawing ID is null or empty');
-      return;
-    }
+    // if (drawing.id == null || drawing.id.isEmpty) {
+    //   print('Error: Drawing ID is null or empty');
+    //   return;
+    // }
     try {
       QuerySnapshot drawingSnapshot = await _firestore
           .collection('drawings')

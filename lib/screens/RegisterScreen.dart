@@ -4,7 +4,6 @@ import 'package:inkpals_app/components/description_text.dart';
 import 'package:inkpals_app/components/header_text.dart';
 import 'package:inkpals_app/components/signup_button.dart';
 import 'package:inkpals_app/constants.dart';
-import 'package:inkpals_app/screens/CanvasScreen.dart';
 import 'package:inkpals_app/screens/MainScreen.dart';
 
 class RegisterScreen extends StatefulWidget {

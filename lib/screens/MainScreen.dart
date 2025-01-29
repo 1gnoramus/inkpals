@@ -38,7 +38,7 @@ class _MainScreenState extends State<MainScreen> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('Confirm Deleting'),
+            title: const Text('Confirm Deleting'),
             content: Text(
                 'Are you sure you want to delete ${drawing.name} drawing?'),
             actions: <Widget>[
@@ -46,7 +46,7 @@ class _MainScreenState extends State<MainScreen> {
                 onPressed: () {
                   Navigator.of(context).pop(false);
                 },
-                child: Text('No'),
+                child: const Text('No'),
               ),
               TextButton(
                 onPressed: () {
@@ -68,48 +68,49 @@ class _MainScreenState extends State<MainScreen> {
 
   void _showAddDrawingDialog() {
     showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-              title: Text('Name your Drawing'),
-              content: TextField(
-                controller: _controller,
-                decoration: InputDecoration(hintText: 'Insert new name'),
-              ),
-              actions: [
-                TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text('Cancel')),
-                ElevatedButton(
-                    onPressed: () {
-                      final name = _controller.text.trim();
-                      List<Line> lines = [];
-                      if (name.isNotEmpty) {
-                        final newDrawing = DrawingModel(
-                          name: name,
-                          lines: lines,
-                          id: DateTime.now().microsecondsSinceEpoch.toString(),
-                        );
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Name your Drawing'),
+        content: TextField(
+          controller: _controller,
+          decoration: const InputDecoration(hintText: 'Insert new name'),
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel')),
+          ElevatedButton(
+              onPressed: () {
+                final name = _controller.text.trim();
+                List<Line> lines = [];
+                if (name.isNotEmpty) {
+                  final newDrawing = DrawingModel(
+                    name: name,
+                    lines: lines,
+                    id: DateTime.now().microsecondsSinceEpoch.toString(),
+                  );
 
-                        setState(() {
-                          _drawings.add(newDrawing);
-                          _controller.clear();
-                        });
+                  setState(() {
+                    _drawings.add(newDrawing);
+                    _controller.clear();
+                  });
 
-                        prefs.saveDrawingOffline(newDrawing);
-                        firebase.saveDrawingtoFirestore(newDrawing);
-                        Navigator.pop(context);
-                      }
-                    },
-                    child: Text("Добавить"))
-              ],
-            ));
+                  prefs.saveDrawingOffline(newDrawing);
+                  firebase.saveDrawingtoFirestore(newDrawing);
+                  Navigator.pop(context);
+                }
+              },
+              child: const Text("Добавить"))
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Your Drawings'),
+        title: const Text('Your Drawings'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -182,8 +183,8 @@ class _MainScreenState extends State<MainScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => {_showAddDrawingDialog()},
-        child: Icon(Icons.add),
         tooltip: 'Добавить новый рисунок',
+        child: const Icon(Icons.add),
       ),
     );
   }
