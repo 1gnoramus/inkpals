@@ -1,8 +1,20 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+<uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+
     <application
         android:label="inkpals_app"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <receiver
+    android:name="com.dexterous.flutterlocalnotifications.receivers.NotificationBroadcastReceiver"
+    android:exported="true"/>
+<receiver
+    android:name="com.dexterous.flutterlocalnotifications.receivers.ScheduledNotificationReceiver"
+    android:exported="true"/>
+<receiver
+    android:name="com.dexterous.flutterlocalnotifications.receivers.ActionReceiver"
+    android:exported="true"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"

@@ -6,10 +6,13 @@ import 'package:inkpals_app/screens/CanvasScreen.dart';
 import 'package:inkpals_app/screens/MainScreen.dart';
 import 'package:inkpals_app/screens/RegisterScreen.dart';
 import 'package:inkpals_app/screens/WelcomeScreen.dart';
+import 'package:inkpals_app/services/notifications.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  await NotificationService().initNotifications();
+  await NotificationService().scheduleDailyNotification();
   runApp(const MyApp());
 }
 
@@ -22,7 +25,6 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: whitishColor),
-        // colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFfdd25d)),
         useMaterial3: true,
       ),
       initialRoute: WelcomeScreen.id,
