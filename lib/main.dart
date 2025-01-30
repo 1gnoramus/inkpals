@@ -11,8 +11,8 @@ import 'package:inkpals_app/services/notifications.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  await NotificationService().initNotifications();
-  await NotificationService().scheduleDailyNotification();
+  // await NotificationService().initNotifications();
+  // await NotificationService().scheduleDailyNotification();
   runApp(const MyApp());
 }
 

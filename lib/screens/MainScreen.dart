@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:inkpals_app/constants.dart';
 import 'package:inkpals_app/models/drawing_model.dart';
@@ -5,6 +7,7 @@ import 'package:inkpals_app/models/line_model.dart';
 import 'package:inkpals_app/screens/CanvasScreen.dart';
 import 'package:inkpals_app/services/firebase_repo.dart';
 import 'package:inkpals_app/services/shared_prefs.dart';
+import 'package:inkpals_app/services/websocket_repo.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -17,11 +20,18 @@ class _MainScreenState extends State<MainScreen> {
   SharedPreferencesRepository prefs = SharedPreferencesRepository();
   final TextEditingController _controller = TextEditingController();
   FirebaseRepository firebase = FirebaseRepository();
+  WebSocketRepository websocket = WebSocketRepository();
 
   List<DrawingModel> _drawings = [];
   @override
   void initState() {
     // prefs.clearAllPreferences();
+    websocket.fetchDrawings();
+    websocket.drawingsStream.listen((drawings) {
+      setState(() {
+        _drawings = drawings;
+      });
+    });
     _loadDrawings();
     super.initState();
   }
@@ -60,6 +70,8 @@ class _MainScreenState extends State<MainScreen> {
     if (confirm == true) {
       await prefs.deleteDrawingOffline(drawing);
       await firebase.deleteDrawingFirestore(drawing);
+      websocket.deleteDrawing(drawing);
+
       setState(() {
         _drawings.removeWhere((doc) => doc.id == drawing.id);
       });
@@ -97,6 +109,10 @@ class _MainScreenState extends State<MainScreen> {
 
                   prefs.saveDrawingOffline(newDrawing);
                   firebase.saveDrawingtoFirestore(newDrawing);
+
+                  websocket.sendNewDrawing(newDrawing);
+                  websocket.fetchDrawings();
+
                   Navigator.pop(context);
                 }
               },
@@ -192,6 +208,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void dispose() {
     _controller.dispose();
+    websocket.disposeWebSocket();
     super.dispose();
   }
 }

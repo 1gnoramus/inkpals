@@ -1,13 +1,10 @@
-import 'dart:convert';
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:inkpals_app/components/canvas_painter.dart';
 import 'package:inkpals_app/models/drawing_model.dart';
 import 'package:inkpals_app/models/line_model.dart';
 import 'package:inkpals_app/services/firebase_repo.dart';
 import 'package:inkpals_app/services/shared_prefs.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:inkpals_app/services/websocket_repo.dart';
 
 class CanvasScreen extends StatefulWidget {
   const CanvasScreen(
@@ -27,34 +24,24 @@ class CanvasScreenState extends State<CanvasScreen> {
   double _strokeWidth = 4.0;
   FirebaseRepository firebase = FirebaseRepository();
   SharedPreferencesRepository prefs = SharedPreferencesRepository();
-
-  final _channel = WebSocketChannel.connect(
-    Uri.parse('wss://websocket-server-node-baeb166e25da.herokuapp.com/'),
-  );
+  WebSocketRepository websocket = WebSocketRepository();
 
   @override
   void initState() {
     super.initState();
     _lines = widget.drawingLines ?? [];
-    _channel.stream.listen((message) {
-      if (message is String) {
-        final data = jsonDecode(message);
-        final line = Line.fromJson(data);
+    websocket.subscribeToDrawing(widget.drawingId!);
+
+    websocket.drawingUpdatesStream.listen((updatedDrawing) {
+      print('LOL:${updatedDrawing.id}');
+      print('KEK:${widget.drawingId}');
+      if (updatedDrawing.id == widget.drawingId) {
+        print("Updated drawing lines: ${updatedDrawing.lines}");
+
         setState(() {
-          _lines.add(line);
+          _lines = updatedDrawing.lines;
         });
-      } else if (message is Uint8List) {
-        final decodedMessage = utf8.decode(message);
-        final data = jsonDecode(decodedMessage);
-        final line = Line.fromJson(data);
-        setState(() {
-          _lines.add(line);
-        });
-      } else {
-        print('Received unsupported message type: ${message.runtimeType}');
       }
-    }, onError: (error) {
-      print('Ошибка WebSocket: $error');
     });
   }
 
@@ -73,6 +60,8 @@ class CanvasScreenState extends State<CanvasScreen> {
                   id: widget.drawingId!,
                   lines: _lines,
                 );
+                websocket.sendDrawingUpdate(updatedDrawing);
+
                 firebase.updateDrawingFirestore(updatedDrawing);
               });
             },
@@ -93,14 +82,19 @@ class CanvasScreenState extends State<CanvasScreen> {
               setState(() {
                 _lines.add(newLine);
               });
-              _channel.sink.add(jsonEncode(newLine.toJson()));
+              websocket.sendDrawingUpdate(DrawingModel(
+                  id: widget.drawingId!,
+                  name: widget.drawingName!,
+                  lines: _lines));
             },
             onPanUpdate: (details) {
               setState(() {
                 _lines.last.points.add(details.localPosition);
               });
-
-              _channel.sink.add(jsonEncode(_lines.last.toJson()));
+              websocket.sendDrawingUpdate(DrawingModel(
+                  id: widget.drawingId!,
+                  name: widget.drawingName!,
+                  lines: _lines));
             },
             onPanEnd: (details) {
               if (_lines.last.points.isNotEmpty) {
@@ -110,7 +104,7 @@ class CanvasScreenState extends State<CanvasScreen> {
                   id: widget.drawingId!,
                   lines: _lines,
                 );
-                _channel.sink.add(jsonEncode(_lines.last.toJson()));
+                websocket.sendDrawingUpdate(updatedDrawing);
                 prefs.updateDrawingOffline(updatedDrawing);
                 firebase.updateDrawingFirestore(updatedDrawing);
               }
@@ -177,13 +171,8 @@ class CanvasScreenState extends State<CanvasScreen> {
 
   @override
   void dispose() {
-    try {
-      if (_channel.closeCode == null) {
-        _channel.sink.close();
-      }
-    } catch (e) {
-      print('Ошибка при закрытии WebSocket: $e');
-    }
+    websocket.disposeWebSocket();
+
     super.dispose();
   }
 }
