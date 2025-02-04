@@ -21,6 +21,14 @@ class SharedPreferencesRepository {
     );
   }
 
+  Future<void> saveDrawingsOffline(List<DrawingModel> drawings) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+      'saved_drawings',
+      json.encode(drawings.map((e) => e.toJson()).toList()),
+    );
+  }
+
   Future<List<DrawingModel>> getDrawingsOffline() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? savedDrawings = prefs.getString('saved_drawings');

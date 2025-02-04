@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:inkpals_app/constants.dart';
 import 'package:inkpals_app/models/drawing_model.dart';
@@ -23,17 +21,23 @@ class _MainScreenState extends State<MainScreen> {
   WebSocketRepository websocket = WebSocketRepository();
 
   List<DrawingModel> _drawings = [];
-  @override
-  void initState() {
-    // prefs.clearAllPreferences();
-    websocket.fetchDrawings();
-    websocket.drawingsStream.listen((drawings) {
-      setState(() {
-        _drawings = drawings;
-      });
+
+  void _syncDrawings(List<DrawingModel> serverDrawings) {
+    if (_areListsEqual(_drawings, serverDrawings)) return;
+
+    setState(() {
+      _drawings = serverDrawings;
     });
-    _loadDrawings();
-    super.initState();
+
+    prefs.saveDrawingsOffline(serverDrawings);
+  }
+
+  bool _areListsEqual(List<DrawingModel> list1, List<DrawingModel> list2) {
+    if (list1.length != list2.length) return false;
+    for (var i = 0; i < list1.length; i++) {
+      if (list1[i].id != list2[i].id) return false;
+    }
+    return true;
   }
 
   Future<void> _loadDrawings() async {
@@ -41,6 +45,18 @@ class _MainScreenState extends State<MainScreen> {
     setState(() {
       _drawings = loadedDrawings;
     });
+  }
+
+  @override
+  void initState() {
+    // prefs.clearAllPreferences();
+    _loadDrawings();
+
+    websocket.fetchDrawings();
+    websocket.drawingsStream.listen((serverDrawings) {
+      _syncDrawings(serverDrawings);
+    });
+    super.initState();
   }
 
   Future<void> _confirmDeleteDrawing(DrawingModel drawing) async {

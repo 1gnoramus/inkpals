@@ -6,7 +6,6 @@ import 'package:inkpals_app/screens/CanvasScreen.dart';
 import 'package:inkpals_app/screens/MainScreen.dart';
 import 'package:inkpals_app/screens/RegisterScreen.dart';
 import 'package:inkpals_app/screens/WelcomeScreen.dart';
-import 'package:inkpals_app/services/notifications.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
